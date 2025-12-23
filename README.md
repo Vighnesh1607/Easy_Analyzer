@@ -1,18 +1,18 @@
-\# Easy Analyzer 🎧📄
+# Easy Analyzer 🎧📄
 
 
 
-Easy Analyzer is an AI-powered system that converts \*\*live meetings or uploaded videos\*\* into:
+Easy Analyzer is an AI-powered system that converts **live meetings or uploaded videos** into:
 
-\- Structured analysis reports
+- Structured analysis reports
 
-\- Clean lecture-style notes
+- Clean lecture-style notes
 
-\- Searchable knowledge using \*\*RAG (Retrieval-Augmented Generation)\*\*
+- Searchable knowledge using **RAG (Retrieval-Augmented Generation)**
 
 
 
-The project demonstrates real-world usage of \*\*LLMs, speech-to-text, embeddings, WebSockets, and secure API handling\*\*.
+The project demonstrates real-world usage of **LLMs, speech-to-text, embeddings, WebSockets, and secure API handling**.
 
 
 
@@ -20,25 +20,25 @@ The project demonstrates real-world usage of \*\*LLMs, speech-to-text, embedding
 
 
 
-\## 🚀 Core Features
+## 🚀 Core Features
 
 
 
-\### 🔴 Live Meeting Capture
+### 🔴 Live Meeting Capture
 
-\- Records live system audio using the browser
+- Records live system audio using the browser
 
-\- Streams audio chunks via WebSocket
+- Streams audio chunks via WebSocket
 
-\- Converts audio to text using \*\*Groq Whisper\*\*
+- Converts audio to text using **Groq Whisper**
 
-\- Generates:
+- Generates:
 
 &nbsp; - Analysis PDF
 
 &nbsp; - Notes PDF
 
-\- Automatically indexes the session for RAG
+- Automatically indexes the session for RAG
 
 
 
@@ -46,21 +46,21 @@ The project demonstrates real-world usage of \*\*LLMs, speech-to-text, embedding
 
 
 
-\### 🎥 Video Upload \& Analysis
+### 🎥 Video Upload \& Analysis
 
-\- Upload recorded video files
+- Upload recorded video files
 
-\- Extracts audio using \*\*FFmpeg\*\*
+- Extracts audio using **FFmpeg**
 
-\- Transcribes speech to text
+- Transcribes speech to text
 
-\- Generates:
+- Generates:
 
 &nbsp; - Analysis report
 
 &nbsp; - Notes report
 
-\- Builds RAG index automatically
+- Builds RAG index automatically
 
 
 
@@ -68,33 +68,17 @@ The project demonstrates real-world usage of \*\*LLMs, speech-to-text, embedding
 
 
 
-\### 🔍 RAG (Retrieval-Augmented Generation)
+### 🔍 RAG (Retrieval-Augmented Generation)
 
-\- Searches across all transcripts
+- Searches across all transcripts
 
-\- Supports \*\*English, Hindi, and Hinglish\*\*
+- Supports **English, Hindi, and Hinglish**
 
-\- Uses multilingual embeddings
+- Uses multilingual embeddings
 
-\- Answers questions \*\*strictly from transcript data\*\*
+- Answers questions **strictly from transcript data**
 
-\- No hallucinations or external knowledge
-
-
-
----
-
-
-
-\### 📄 PDF Generation
-
-\- Structured analysis PDF
-
-\- Structured notes PDF
-
-\- UTF-8 safe (supports Hindi text)
-
-\- Downloadable from frontend UI
+- No hallucinations or external knowledge
 
 
 
@@ -102,53 +86,68 @@ The project demonstrates real-world usage of \*\*LLMs, speech-to-text, embedding
 
 
 
-\## 🛠️ Tech Stack
+### 📄 PDF Generation
+
+- Structured analysis PDF
+
+- Structured notes PDF
+
+- UTF-8 safe (supports Hindi text)
+
+- Downloadable from frontend UI
 
 
 
-\### Backend
+---
 
-\- Python
 
-\- FastAPI
 
-\- WebSockets
+## 🛠️ Tech Stack
 
-\- Groq API
+
+
+### Backend
+
+- Python
+
+- FastAPI
+
+- WebSockets
+
+- Groq API
 
 &nbsp; - Whisper (`whisper-large-v3`)
 
 &nbsp; - LLMs (`qwen/qwen3-32b`, `llama-3.1-8b-instant`)
 
-\- FFmpeg (audio extraction)
+- FFmpeg (audio extraction)
 
-\- Sentence Transformers (multilingual embeddings)
+- Sentence Transformers (multilingual embeddings)
 
-\- Scikit-learn (cosine similarity)
-
-
-
-\### Frontend
-
-\- HTML
-
-\- JavaScript
-
-\- React (via CDN)
-
-\- Tailwind CSS
+- Scikit-learn (cosine similarity)
 
 
 
-\### AI / NLP
+### Frontend
 
-\- Speech-to-Text (Whisper)
+- HTML
+- JavaScript
 
-\- Transcript Analysis (LLM)
+- React (via CDN)
 
-\- Note Generation (LLM)
+- Tailwind CSS
 
-\- RAG with vector search
+
+
+### AI / NLP
+
+- Speech-to-Text (Whisper)
+
+- Transcript Analysis (LLM)
+
+- Note Generation (LLM)
+
+- RAG with vector search
 
 
 
