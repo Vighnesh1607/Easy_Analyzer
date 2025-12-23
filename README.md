@@ -156,7 +156,29 @@ The project demonstrates real-world usage of \*\*LLMs, speech-to-text, embedding
 
 
 
-\## 📁 Project Structure
+## ⚙️ Setup Instructions
+
+### 1️⃣ Clone Repository
+git clone https://github.com/Vighnesh1607/Easy_Analyzer.git
+
+## 2️⃣ Create Virtual Environment (recommended)
+
+## 3️⃣ Install Dependencies
+pip install -r requirements.txt
+
+## 4️⃣ Configure API Key
+GROQ_API_KEY=your_real_api_key_here
+
+## 5️⃣ Run Backend Server
+python STT/live_server.py
+
+## 6️⃣ Run Frontend
+Frontend/index.html
+
+
+
+
+
 
 
 
