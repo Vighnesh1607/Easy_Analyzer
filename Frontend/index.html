@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>AI Meeting Analyzer</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #f7f8fa;
+      --panel: #ffffff;
+      --border: #e3e6ea;
+      --text: #1c2128;
+      --text-dim: #6b7280;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --success-bg: #ecfdf5;
+      --success-border: #a7f3d0;
+      --success-text: #047857;
+      --sidebar-bg: #14181f;
+      --sidebar-text: #aab2bf;
+      --sidebar-active: #2563eb;
+      --radius: 8px;
+      --mono: "SF Mono", "Cascadia Code", Consolas, monospace;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      display: flex;
+      height: 100vh;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width: 188px;
+      background: var(--sidebar-bg);
+      color: var(--sidebar-text);
+      display: flex;
+      flex-direction: column;
+      padding: 24px 0;
+      flex-shrink: 0;
+    }
+
+    .sidebar .brand {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      padding: 0 20px;
+      margin-bottom: 28px;
+      letter-spacing: 0.2px;
+    }
+
+    .sidebar nav {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 0 12px;
+    }
+
+    .sidebar button {
+      all: unset;
+      cursor: pointer;
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-size: 13px;
+      color: var(--sidebar-text);
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .sidebar button:hover {
+      background: #1f2530;
+      color: #fff;
+    }
+
+    .sidebar button.active {
+      background: var(--sidebar-active);
+      color: #fff;
+      font-weight: 500;
+    }
+
+    /* MAIN */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .topbar {
+      height: 56px;
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 28px;
+      flex-shrink: 0;
+    }
+
+    .topbar h1 {
+      font-size: 16px;
+      font-weight: 600;
+      margin: 0;
+    }
+
+    .topbar .subtitle {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin: 0;
+    }
+
+    .status {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    .status .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #16a34a;
+    }
+
+    .status .dot.off {
+      background: #d1d5db;
+    }
+
+    .page {
+      flex: 1;
+      overflow: auto;
+    }
+
+    /* DASHBOARD */
+    .dash {
+      padding: 32px;
+    }
+
+    .dash h2 {
+      margin: 0 0 6px;
+      font-size: 20px;
+    }
+
+    .dash p.lead {
+      color: var(--text-dim);
+      font-size: 13px;
+      margin: 0 0 24px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      max-width: 760px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      cursor: pointer;
+      transition: box-shadow 0.15s, border-color 0.15s;
+    }
+
+    .card:hover {
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+      border-color: #c7cdd6;
+    }
+
+    .card h3 {
+      margin: 0 0 4px;
+      font-size: 13.5px;
+      font-weight: 600;
+    }
+
+    .card p {
+      margin: 0;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    /* TRANSCRIBE LAYOUT */
+    .transcribe {
+      display: flex;
+      height: 100%;
+    }
+
+    .panel-left {
+      width: 280px;
+      background: var(--panel);
+      border-right: 1px solid var(--border);
+      padding: 20px;
+      flex-shrink: 0;
+      overflow-y: auto;
+    }
+
+    .panel-left h3 {
+      font-size: 13px;
+      font-weight: 600;
+      margin: 0 0 14px;
+    }
+
+    .field-label {
+      display: block;
+      font-size: 11.5px;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    select,
+    input[type=file] {
+      font-size: 12.5px;
+      font-family: inherit;
+    }
+
+    select {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 7px 8px;
+      margin-bottom: 18px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .btn {
+      all: unset;
+      display: block;
+      width: 100%;
+      text-align: center;
+      box-sizing: border-box;
+      padding: 9px 12px;
+      border-radius: 6px;
+      font-size: 12.5px;
+      font-weight: 500;
+      cursor: pointer;
+      margin-bottom: 8px;
+      transition: background 0.15s, opacity 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: #fff;
+    }
+
+    .btn-danger:hover {
+      background: var(--danger-hover);
+    }
+
+    .btn-secondary {
+      background: #eef0f3;
+      color: var(--text);
+    }
+
+    .btn-secondary:hover {
+      background: #e2e5ea;
+    }
+
+    .btn:disabled {
+      background: #eef0f3 !important;
+      color: #9aa1ab !important;
+      cursor: not-allowed;
+    }
+
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 16px 0;
+    }
+
+    .result-box {
+      margin-top: 16px;
+      background: var(--success-bg);
+      border: 1px solid var(--success-border);
+      border-radius: 6px;
+      padding: 12px;
+    }
+
+    .result-box p {
+      margin: 0 0 4px;
+      font-size: 12px;
+      color: var(--success-text);
+      font-weight: 500;
+    }
+
+    .result-box a {
+      font-size: 12.5px;
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    .panel-center {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 32px;
+    }
+
+    .panel-center h2 {
+      font-size: 18px;
+      margin: 0 0 6px;
+    }
+
+    .panel-center p {
+      font-size: 12.5px;
+      color: var(--text-dim);
+      margin: 0;
+    }
+
+    .rec-pulse {
+      width: 14px;
+      height: 14px;
+      border-radius: 50%;
+      background: var(--danger);
+      margin: 0 auto 14px;
+      animation: pulse 1.4s infinite;
+    }
+
+    @keyframes pulse {
+      0% {
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.5);
+      }
+
+      70% {
+        box-shadow: 0 0 0 12px rgba(220, 38, 38, 0);
+      }
+
+      100% {
+        box-shadow: 0 0 0 0 rgba(220, 38, 38, 0);
+      }
+    }
+
+    .panel-right {
+      width: 300px;
+      background: var(--panel);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+    }
+
+    .panel-right .head {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      font-size: 12.5px;
+      font-weight: 600;
+    }
+
+    .feed {
+      flex: 1;
+      overflow-y: auto;
+      padding: 10px;
+    }
+
+    .feed .empty {
+      font-size: 12px;
+      color: #9aa1ab;
+      text-align: center;
+      padding: 24px 0;
+      font-style: italic;
+    }
+
+    .feed .entry {
+      font-size: 11.5px;
+      font-family: var(--mono);
+      color: var(--text);
+      background: #f3f4f6;
+      border-radius: 5px;
+      padding: 6px 8px;
+      margin-bottom: 6px;
+      word-break: break-word;
+    }
+
+    /* RAG */
+    .rag-wrap {
+      max-width: 720px;
+      margin: 0 auto;
+      padding: 32px;
+    }
+
+    .rag-wrap h2 {
+      font-size: 20px;
+      margin: 0 0 14px;
+    }
+
+    textarea {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px;
+      font-size: 13px;
+      font-family: inherit;
+      resize: vertical;
+      margin-bottom: 10px;
+    }
+
+    .answer-box {
+      margin-top: 16px;
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      border-radius: 6px;
+      padding: 14px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .settings-wrap {
+      padding: 32px;
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="app" id="app"></div>
+
+  <script>
+    /* ============================================================
+       STATE
+       ============================================================ */
+    const state = {
+      page: "dashboard",
+      log: [],
+      outputType: "analysis",
+      pdfLink: "",
+      isRecording: false,
+      sessionId: "",
+    };
+
+    let ws = null;
+    let recorder = null;
+
+    const API_BASE = "http://localhost:8080";
+    const WS_BASE  = "ws://localhost:8080";
+
+    /* ============================================================
+       HELPERS
+       ============================================================ */
+    function addLog(msg) {
+      state.log.unshift(new Date().toLocaleTimeString() + " — " + msg);
+      render();
+    }
+
+    function safeSend(payload) {
+      try {
+        if (ws && ws.readyState === 1) ws.send(payload);
+      } catch (e) { }
+    }
+
+    function escapeHtml(str) {
+      const d = document.createElement("div");
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    /* ============================================================
+       ACTIONS
+       ============================================================ */
+    async function startLive() {
+      if (state.isRecording) return;
+
+      const sid = "meeting_" + Date.now();
+      state.sessionId = sid;
+      addLog("Starting session...");
+
+      ws = new WebSocket(WS_BASE + "/ws/live/" + sid);
+
+      ws.onopen = () => safeSend("__OUTPUT_TYPE__::" + state.outputType);
+
+      ws.onmessage = (e) => {
+        if (e.data.startsWith("__REPORT_READY__")) {
+          const id = e.data.split("::")[1];
+          state.pdfLink = API_BASE + "/live-report/" + id;
+          addLog("PDF Ready");
+        } else {
+          addLog(e.data);
+        }
+      };
+
+      ws.onerror = () => addLog("WebSocket error — is the backend running on :8080?");
+
+      try {
+        const stream = await navigator.mediaDevices.getDisplayMedia({ audio: true, video: true });
+        const ctx = new AudioContext();
+        const dest = ctx.createMediaStreamDestination();
+        ctx.createMediaStreamSource(stream).connect(dest);
+
+        recorder = new MediaRecorder(dest.stream);
+        recorder.ondataavailable = async (ev) => {
+          if (ws && ws.readyState === 1) ws.send(await ev.data.arrayBuffer());
+        };
+        recorder.start(1000);
+        state.isRecording = true;
+        render();
+      } catch (err) {
+        addLog("Could not start capture: " + err.message);
+      }
+    }
+
+    function stopLive() {
+      if (recorder) recorder.stop();
+      safeSend("__END_MEETING__");
+      state.isRecording = false;
+      addLog("Stopped");
+    }
+
+    async function uploadVideo(file) {
+      if (!file) return;
+      addLog("Uploading...");
+
+      const fd = new FormData();
+      fd.append("file", file);
+      fd.append("output_type", state.outputType);
+
+      try {
+        const res = await fetch(API_BASE + "/upload-video", { method: "POST", body: fd });
+        const data = await res.json();
+
+        if (data.session_id) state.sessionId = data.session_id;
+
+        if (state.outputType === "analysis" && data.analysis) {
+          state.pdfLink = data.analysis;
+        } else if (state.outputType === "notes" && data.notes) {
+          state.pdfLink = data.notes;
+        } else if (data.pdf_url) {
+          state.pdfLink = data.pdf_url;
+        }
+
+        addLog("Processed");
+      } catch (err) {
+        addLog("Upload failed: " + err.message);
+      }
+      render();
+    }
+
+    async function indexNow() {
+      if (!state.sessionId) return addLog("No session ID.");
+      try {
+        await fetch(API_BASE + "/rag/store/" + state.sessionId, { method: "POST" });
+        addLog("Indexed");
+      } catch (err) {
+        addLog("Index failed: " + err.message);
+      }
+    }
+
+    async function askRag(question, onDone) {
+      try {
+        const res = await fetch(API_BASE + "/rag/query", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ question }),
+        });
+        const data = await res.json();
+        onDone(data.answer || "No answer.");
+      } catch (err) {
+        onDone("Request failed: " + err.message);
+      }
+    }
+
+    /* ============================================================
+       RENDER: SIDEBAR + TOPBAR
+       ============================================================ */
+    function renderSidebar() {
+      const menu = [
+        { name: "Dashboard", key: "dashboard" },
+        { name: "Transcription", key: "transcribe" },
+        { name: "RAG", key: "rag" },
+        { name: "Settings", key: "settings" },
+      ];
+      return `
+    <aside class="sidebar">
+      <div class="brand">EasyAnalyzer</div>
+      <nav>
+        ${menu.map(m => `
+          <button data-nav="${m.key}" class="${state.page === m.key ? "active" : ""}">${m.name}</button>
+        `).join("")}
+      </nav>
+    </aside>
+  `;
+    }
+
+    function renderTopbar() {
+      const titles = { dashboard: "Dashboard", transcribe: "Transcription", rag: "RAG", settings: "Settings" };
+      return `
+    <header class="topbar">
+      <div>
+        <h1>${titles[state.page]}</h1>
+        <p class="subtitle">Audio analysis workspace</p>
+      </div>
+      <div class="status"><span class="dot"></span>Connected</div>
+    </header>
+  `;
+    }
+
+    /* ============================================================
+       RENDER: DASHBOARD
+       ============================================================ */
+    function renderDashboard() {
+      return `
+    <div class="dash">
+      <h2>Welcome back</h2>
+      <p class="lead">Pick up where you left off, or start something new.</p>
+      <div class="cards">
+        <div class="card" data-nav="transcribe"><h3>Live Transcription</h3><p>Capture and transcribe a live meeting</p></div>
+        <div class="card" data-nav="transcribe"><h3>Upload & Analyze</h3><p>Process a recorded video file</p></div>
+        <div class="card" data-nav="rag"><h3>Search with RAG</h3><p>Ask questions about past sessions</p></div>
+      </div>
+    </div>
+  `;
+    }
+
+    /* ============================================================
+       RENDER: TRANSCRIBE
+       ============================================================ */
+    function renderTranscribe() {
+      return `
+    <div class="transcribe">
+      <div class="panel-left">
+        <h3>Recording settings</h3>
+
+        <label class="field-label">Output format</label>
+        <select id="outputType">
+          <option value="analysis" ${state.outputType === "analysis" ? "selected" : ""}>Analysis PDF</option>
+          <option value="notes" ${state.outputType === "notes" ? "selected" : ""}>Notes PDF</option>
+        </select>
+
+        <button class="btn btn-primary" id="startBtn" ${state.isRecording ? "disabled" : ""}>
+          ${state.isRecording ? "Recording..." : "Start live capture"}
+        </button>
+        <button class="btn btn-danger" id="stopBtn" ${!state.isRecording ? "disabled" : ""}>
+          Stop recording
+        </button>
+
+        <div class="divider"></div>
+
+        <button class="btn btn-secondary" id="indexBtn">Index for search</button>
+
+        <div class="divider"></div>
+
+        <label class="field-label">Or upload a video file</label>
+        <input type="file" id="uploadInput" accept="video/*" />
+
+        ${state.pdfLink ? `
+          <div class="result-box">
+            <p>Report ready</p>
+            <a href="${state.pdfLink}" target="_blank">Download PDF →</a>
+          </div>
+        ` : ""}
+      </div>
+
+      <div class="panel-center">
+        ${state.isRecording ? `
+          <div>
+            <div class="rec-pulse"></div>
+            <h2>Recording in progress</h2>
+            <p>Session: ${escapeHtml(state.sessionId)}</p>
+          </div>
+        ` : `
+          <div>
+            <h2>Ready to capture</h2>
+            <p>Click "Start live capture" to begin recording your meeting.</p>
+          </div>
+        `}
+      </div>
+
+      <div class="panel-right">
+        <div class="head">Activity feed</div>
+        <div class="feed">
+          ${state.log.length === 0
+          ? `<div class="empty">No activity yet</div>`
+          : state.log.map(l => `<div class="entry">${escapeHtml(l)}</div>`).join("")}
+        </div>
+      </div>
+    </div>
+  `;
+    }
+
+    /* ============================================================
+       RENDER: RAG
+       ============================================================ */
+    let ragAnswer = "";
+    function renderRag() {
+      return `
+    <div class="rag-wrap">
+      <h2>Knowledge search</h2>
+      <textarea id="ragQuestion" rows="4" placeholder="Ask something about your past sessions..."></textarea>
+      <button class="btn btn-primary" style="width:auto; padding:9px 18px;" id="ragAskBtn">Search</button>
+      ${ragAnswer ? `<div class="answer-box">${escapeHtml(ragAnswer)}</div>` : ""}
+    </div>
+  `;
+    }
+
+    /* ============================================================
+       RENDER: SETTINGS
+       ============================================================ */
+    function renderSettings() {
+      return `<div class="settings-wrap">Settings coming soon...</div>`;
+    }
+
+    /* ============================================================
+       MAIN RENDER
+       ============================================================ */
+    function render() {
+      const pages = {
+        dashboard: renderDashboard,
+        transcribe: renderTranscribe,
+        rag: renderRag,
+        settings: renderSettings,
+      };
+
+      document.getElementById("app").innerHTML = `
+    ${renderSidebar()}
+    <div class="main">
+      ${renderTopbar()}
+      <div class="page">${pages[state.page]()}</div>
+    </div>
+  `;
+
+      attachHandlers();
+    }
+
+    /* ============================================================
+       EVENT WIRING (re-attached after every render)
+       ============================================================ */
+    function attachHandlers() {
+      document.querySelectorAll("[data-nav]").forEach(el => {
+        el.addEventListener("click", () => {
+          state.page = el.getAttribute("data-nav");
+          render();
+        });
+      });
+
+      const outputSel = document.getElementById("outputType");
+      if (outputSel) outputSel.addEventListener("change", (e) => state.outputType = e.target.value);
+
+      const startBtn = document.getElementById("startBtn");
+      if (startBtn) startBtn.addEventListener("click", startLive);
+
+      const stopBtn = document.getElementById("stopBtn");
+      if (stopBtn) stopBtn.addEventListener("click", stopLive);
+
+      const indexBtn = document.getElementById("indexBtn");
+      if (indexBtn) indexBtn.addEventListener("click", indexNow);
+
+      const uploadInput = document.getElementById("uploadInput");
+      if (uploadInput) uploadInput.addEventListener("change", (e) => uploadVideo(e.target.files[0]));
+
+      const ragAskBtn = document.getElementById("ragAskBtn");
+      if (ragAskBtn) {
+        ragAskBtn.addEventListener("click", () => {
+          const q = document.getElementById("ragQuestion").value.trim();
+          if (!q) return;
+          ragAskBtn.textContent = "Searching...";
+          ragAskBtn.disabled = true;
+          askRag(q, (answer) => {
+            ragAnswer = answer;
+            render();
+          });
+        });
+      }
+    }
+
+    render();
+  </script>
+</body>
+
+</html>

@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+groq
+python-dotenv
+
+ffmpeg-python
+
+sentence-transformers
+scikit-learn
+numpy
+
+pydantic

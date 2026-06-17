@@ -1,0 +1,42 @@
+# =========================
+# Secrets
+# =========================
+.env
+
+# =========================
+# Python
+# =========================
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# =========================
+# Generated folders
+# =========================
+STT/analysis/
+STT/analysis_notes/
+STT/audio/
+STT/live_reports/
+STT/live_transcripts/
+STT/notes_pdf/
+STT/rag/
+STT/reports/
+STT/transcripts/
+STT/videos/
+
+# =========================
+# Generated files
+# =========================
+STT/chunks.json
+STT/processed_audio.json
+STT/processed_video.json
+STT/rag_index.faiss
+STT/rag_index.json
+STT/test.py
+
+# =========================
+# OS
+# =========================
+Thumbs.db
+.DS_Store
